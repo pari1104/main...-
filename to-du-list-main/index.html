@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="To-do ro'yxati - Sardor tomonidan">
+  <meta name="author" content="Sardor">
+  <meta name="keywords" content="To-do, vazifalar, ro'yxat, JavaScript, CSS, HTML">
+  <meta property="og:title" content="To-do Ro‘yxati 📋">
+  <meta property="og:description" content="Oddiy To-do ro'yxati - Sardor tomonidan yaratilgan loyihaning o'ziga xos xususiyatlari.">
+  <meta property="og:image" content="image_link_here">
+  <meta property="og:url" content="https://yourwebsite.com">
+  <meta name="twitter:title" content="To-do Ro‘yxati 📋">
+  <meta name="twitter:description" content="Oddiy To-do ro'yxati - Sardor tomonidan yaratilgan loyihaning o'ziga xos xususiyatlari.">
+  <meta name="twitter:image" content="image_link_here">
+  <meta name="twitter:card" content="summary_large_image">
+  
+  <title>To-do Ro‘yxati 📋</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .fade-in {
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from {opacity: 0; transform: scale(0.95);}
+      to {opacity: 1; transform: scale(1);}
+    }
+
+    /* Responsiv dizayn uchun qo‘shimchalar */
+    @media (max-width: 640px) {
+      body {
+        font-size: 14px;
+      }
+
+      .bg-gradient-to-br {
+        background-size: 200% 200%;
+      }
+
+      .max-w-md {
+        max-width: 100%;
+      }
+
+      .w-full {
+        width: 100%;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      button {
+        padding: 10px;
+      }
+
+      .modal-content {
+        width: 90%;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-purple-500 to-blue-500 min-h-screen flex items-center justify-center px-4">
+
+  <!-- Qo‘llanma tugmasi -->
+  <div class="fixed top-5 right-5 z-50">
+    <button onclick="openModal()"
+      class="bg-yellow-400 hover:bg-yellow-500 text-black px-4 py-2 rounded-xl shadow-lg transition duration-300">
+      📖 Qo‘llanma
+    </button>
+  </div>
+
+  <!-- Modal (Qo‘llanma oynasi) -->
+  <div id="guideModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white w-11/12 max-w-lg p-6 rounded-xl shadow-xl animate-fade-in">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-bold text-gray-800">📋 Loyihaning Qo‘llanmasi</h2>
+        <button onclick="closeModal()" class="text-2xl text-gray-600 hover:text-red-500">&times;</button>
+      </div>
+      <p class="mb-2"><strong>Loyiha nomi:</strong> Oddiy To-do ro‘yhat</p>
+      <p class="mb-2"><strong>Nima uchun kerak?</strong> Bu loyiha foydalanuvchiga vazifalarini yozib borish, eslab qolish va boshqarishda yordam beradi. Ish samaradorligini oshiradi.</p>
+      <p class="mb-2"><strong>Qanday ishlaydi?</strong></p>
+      <ul class="list-disc pl-6 text-gray-700">
+        <li>Yangi vazifani yozasiz va "Qo‘shish" tugmasini bosasiz</li>
+        <li>Vazifani bajargan bo‘lsangiz ✅ belgisi bilan belgilaysiz</li>
+        <li>Keraksiz bo‘lsa 🗑 belgisi bilan o‘chirasiz</li>
+        <li>Barcha ma’lumotlar avtomatik saqlanadi (localStorage orqali)</li>
+      </ul>
+      <p class="mt-4 text-sm text-gray-500 text-center">Yaratuvchi: <strong>Sardor</strong></p>
+    </div>
+  </div>
+
+  <!-- Asosiy To-do ro‘yxati -->
+  <div class="bg-white bg-opacity-90 backdrop-blur-lg shadow-2xl rounded-2xl p-6 w-full max-w-md transition-all duration-500">
+    <h1 class="text-3xl font-extrabold text-center text-gray-800 mb-6">📋 Mening To-do Ro‘yxatim</h1>
+
+    <div class="flex gap-2 mb-4">
+      <input id="taskInput" type="text" placeholder="Vazifa kiriting..." 
+             class="flex-grow p-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-400 transition">
+      <button onclick="addTask()" 
+              class="bg-purple-500 text-white px-4 py-2 rounded-xl hover:bg-purple-600 transition-all duration-300 active:scale-95">Qo‘shish</button>
+    </div>
+
+    <ul id="taskList" class="space-y-3">
+      <!-- Vazifalar shu yerga tushadi -->
+    </ul>
+  </div>
+
+  <script>
+    let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+    function saveTasks() {
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+    }
+
+    function renderTasks() {
+      const list = document.getElementById("taskList");
+      list.innerHTML = "";
+      tasks.forEach((task, index) => {
+        const li = document.createElement("li");
+        li.className = "fade-in flex items-center justify-between bg-white p-3 rounded-xl shadow-sm transition-all duration-300 hover:shadow-lg";
+
+        const text = document.createElement("span");
+        text.textContent = task.text;
+        text.className = task.done ? "line-through text-gray-400 text-lg" : "text-lg";
+
+        const buttons = document.createElement("div");
+        buttons.className = "flex gap-2";
+
+        const doneBtn = document.createElement("button");
+        doneBtn.textContent = "✅";
+        doneBtn.className = "hover:scale-110 transition transform";
+        doneBtn.onclick = () => {
+          tasks[index].done = !tasks[index].done;
+          saveTasks();
+          renderTasks();
+        };
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "🗑";
+        deleteBtn.className = "hover:scale-110 transition transform";
+        deleteBtn.onclick = () => {
+          tasks.splice(index, 1);
+          saveTasks();
+          renderTasks();
+        };
+
+        buttons.appendChild(doneBtn);
+        buttons.appendChild(deleteBtn);
+
+        li.appendChild(text);
+        li.appendChild(buttons);
+        list.appendChild(li);
+      });
+    }
+
+    function addTask() {
+      const input = document.getElementById("taskInput");
+      const text = input.value.trim();
+      if (text !== "") {
+        tasks.push({ text, done: false });
+        input.value = "";
+        saveTasks();
+        renderTasks();
+      }
+    }
+
+    renderTasks();
+
+    // Modal funksiyalari
+    function openModal() {
+      document.getElementById("guideModal").classList.remove("hidden");
+      document.getElementById("guideModal").classList.add("flex");
+    }
+
+    function closeModal() {
+      document.getElementById("guideModal").classList.remove("flex");
+      document.getElementById("guideModal").classList.add("hidden");
+    }
+
+    // Escape tugmasi bosilganda yopiladi
+    window.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") closeModal();
+    });
+  </script>
+
+</body>
+</html>
